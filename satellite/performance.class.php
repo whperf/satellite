@@ -2,7 +2,7 @@
   
   class performance {
     private $post_fields = array();
-    private $version = '1.2.8.1';
+    private $version = '1.3';
     private $api_url = 'http://www.webhosting-performance.com/api/';
     private $debug = false;
     private $country = '';
@@ -14,6 +14,31 @@
       if (!isset($_SERVER['SERVER_ADDR']) || $_SERVER['SERVER_ADDR'] == '') {
         $_SERVER['SERVER_ADDR'] = $this->get_ip();
       }
+    }
+    
+    function run_test() {
+      
+    // Perform auto update (silently)
+      $this->update(true);
+      
+    // CPU Load
+      $this->perform_pi_calc();
+      
+    // MySQL
+      $this->perform_mysql_test(1000);
+      
+    // Disk I/O
+      $this->perform_disk_test(30000);
+      
+    // Bandwidth
+      $this->perform_upstream_test(1*1024*1000);
+      $this->perform_downstream_test(1*1024*1000);
+      
+    // Environment
+      $this->collect_server_info();
+      
+    // Send data
+      $this->submit_results();
     }
     
     private function get_country() {
@@ -106,6 +131,7 @@
   
     public function perform_mysql_test($cycles=1000) {
     
+      require_once('database.class.php');
       $database = new database;
       
       /* ---------------------------------------------------------------- */
@@ -162,7 +188,7 @@
       $tsStart = microtime(true);
       
       $result = $database->query("SELECT * FROM `". $database->table_prefix ."test`");
-        
+      
       $num_results = 0;
       while($row = $database->fetch($result)) {
         extract($row);
@@ -377,7 +403,6 @@
       $this->post_fields['bandwidth']['upstream_url'] = $url;
     }
     
-    
     public function perform_downstream_test($size=1024000) {
       
       switch($this->country) {
@@ -499,11 +524,11 @@
     public function update($silent=false) {
       $updated = false;
     
-      $url = $this->api_url.'?action=update';
+      $url = $this->api_url.'update2';
       
-      $response = $this->http_request($url);
+      $response = $this->http_request($url, array('whoami' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']));
       
-      $response = unserialize($response);
+      $response = json_decode($response, true);
       if ($response === false) trigger_error("Unexpected response data from $url", E_USER_ERROR);
       
       if (strtolower($response['status']) != 'ok') die($response['status'] .'.');
@@ -511,6 +536,7 @@
       if (!isset($response['files']) || !is_array($response['files'])) die('No files listed by API.');
       
       foreach ($response['files'] as $file) {
+        $file['source'] = base64_decode($file['source']);
       
         if (md5($file['source']) == $file['checksum']) {
 
@@ -541,13 +567,14 @@
         echo implode('<br />' . PHP_EOL, $output);
         echo '<p>To run the test again, <a href="'. str_replace(array('index.php', 'update.php'), '', $_SERVER['REQUEST_URI']) .'">click here</a>.</p>';
       } else {
-        header('Location:');
+        header('Location: '. $_SERVER['REQUEST_URI']);
+        exit;
       }
     }
     
     public function submit_results() {
       
-      $response = $this->http_request($this->api_url.'?action=report', $this->post_fields);
+      $response = $this->http_request($this->api_url.'report', $this->post_fields);
       
       $content = unserialize($response);
       if ($content === false) die('Invalid API response data:<br/>' . $response);

@@ -8,7 +8,7 @@
   
   $updated = false;
   
-  $ch = curl_init('http://www.webhosting-performance.com/api/?action=update');
+  $ch = curl_init('http://www.webhosting-performance.com/api/update2');
   curl_setopt($ch, CURLOPT_HEADER, "Expect:\r\n");
   curl_setopt($ch, CURLOPT_TIMEOUT, 15);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    
@@ -16,7 +16,7 @@
   
   if ($response === false) throw new Exception("Problem reading data from $url, ". curl_error($ch));
   
-  $response = unserialize($response);
+  $response = json_decode($response, true);
   if ($response === false) throw new Exception("Problem reading data from $url, $php_errormsg: $response");
   
   if (strtolower($response['status']) != 'ok') die($response['status'] .'.');
@@ -24,7 +24,8 @@
   if (!isset($response['files']) || !is_array($response['files'])) die('No files listed by API.');
   
   foreach ($response['files'] as $file) {
-  
+    $file['source'] = base64_decode($file['source']);
+    
     if (md5($file['source']) == $file['checksum']) {
       
       if (!file_exists($file['filename']) || $file['checksum'] != md5_file($file['filename'])) {
