@@ -1,22 +1,19 @@
 <?php
   
   class performance {
-    private $post_fields = array();
-    private $version = '1.3';
-    private $api_url = 'http://www.webhosting-performance.com/api/';
-    private $debug = false;
-    private $country = '';
+    private $_post_fields = array();
+    private $_version = '1.3';
+    private $_api_url = 'http://www.webhosting-performance.com/api/';
+    private $_debug = false;
+    private $_country_code = '';
     
     function __construct() {
     
-      $this->country = $this->get_country();
+      $this->_country_code = $this->_get_country();
       
       if (!isset($_SERVER['SERVER_ADDR']) || $_SERVER['SERVER_ADDR'] == '') {
-        $_SERVER['SERVER_ADDR'] = $this->get_ip();
+        $_SERVER['SERVER_ADDR'] = $this->_get_ip();
       }
-    }
-    
-    function run_test() {
       
     // Perform auto update (silently)
       $this->update(true);
@@ -41,40 +38,36 @@
       $this->submit_results();
     }
     
-    private function get_country() {
-    
+    private function _get_country() {
+      
+      if (defined('COUNTRY_CODE') && COUNTRY_CODE != '') return COUNTRY_CODE;
+      
       if (file_exists('country.dat')) {
-      
-        $country = file_get_contents('country.dat');
-        
-      } else {
-      
-        $response = $this->http_request('http://freegeoip.net/json/');
-        $response = json_decode($response);
-        $country = $response->{'country_code'};
-        
-        if ($country != '' && $country != 'XX') {
-        
-          file_put_contents('country.dat', $country);
-          return $country;
-
-        } else {
-        
-          $response = $this->http_request('http://api.hostip.info/country.php');
-          $country = $response;
-
-          if ($country != '' && $country != 'XX') {
-          
-            file_put_contents('country.dat', $country);
-            return $country;
-          }
-        }
+        $country_code = file_get_contents('country.dat');
+        if (!empty($country_code)) return $country_code;
       }
       
-      return ($country != '') ? $country : 'US';
+    // Attempt #1 - Freegeoip.net
+      $response = $this->http_request('http://freegeoip.net/json/');
+      $response = json_decode($response, true);
+      $country_code = $response['country_code'];
+      if (!empty($country_code) && $country_code != 'XX') {
+        file_put_contents('country.dat', $country_code);
+        return $country_code;
+      }
+      
+    // Attempt #2 - HostIP.info
+      $response = $this->http_request('http://api.hostip.info/country.php');
+      $country_code = $response;
+      if (!empty($country_code) && $country_code != 'XX') {
+        file_put_contents('country.dat', $country_code);
+        return $country_code;
+      }
+      
+      return 'US';
     }
     
-    private function get_ip() {
+    private function _get_ip() {
       $response = $this->http_request('http://checkip.dyndns.org/');
       
       if (preg_match('/Current IP Address: (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $response, $matches)) {
@@ -82,10 +75,10 @@
       }
     }
     
-    private function log($method_name, $message, $is_debug=false) {
-      if (!$this->log) return;
+    private function _log($method_name, $message, $is_debug=false) {
+      if (!$this->_log) return;
       
-      if ($is_debug && $this->debug == false) return;
+      if ($is_debug && $this->_debug == false) return;
       
       echo date('H:i:s') .' ['. $method_name .'()'. (($is_debug) ? ':debug' : false) .'] '. $message . PHP_EOL;
       flush();
@@ -112,7 +105,7 @@
       
       $time_elapsed = microtime(true) - $tsStart;
       
-      $this->post_fields['cpu']['pi'] = $time_elapsed;
+      $this->_post_fields['cpu']['pi'] = $time_elapsed;
     }
     
     public function perform_for_calc($cycles=10000) {
@@ -126,7 +119,7 @@
       
       $time_elapsed = microtime(true) - $tsStart;
       
-      $this->post_fields['cpu']['for'] = $time_elapsed;
+      $this->_post_fields['cpu']['for'] = $time_elapsed;
     }
   
     public function perform_mysql_test($cycles=1000) {
@@ -148,14 +141,14 @@
       
       $measure_time = $time_elapsed / 10;
       
-      $this->post_fields['mysql']['connect'] = $measure_time;
+      $this->_post_fields['mysql']['connect'] = $measure_time;
       
       /* ---------------------------------------------------------------- */
       
       $database->connect();
       
       if (method_exists($database, 'get_server_info')) {
-        $this->post_fields['mysql']['version'] = $database->get_server_info();
+        $this->_post_fields['mysql']['version'] = $database->get_server_info();
       }
       
       $database->query("DROP TABLE IF EXISTS `". $database->table_prefix ."test`;");
@@ -181,7 +174,7 @@
       
       $data_speed = round($cycles / $time_elapsed);
       
-      $this->post_fields['mysql']['insert'] = $data_speed;
+      $this->_post_fields['mysql']['insert'] = $data_speed;
     
       /* ---------------------------------------------------------------- */
 
@@ -201,7 +194,7 @@
       
       $data_speed = $cycles / $time_elapsed;
       
-      $this->post_fields['mysql']['select'] = $data_speed;
+      $this->_post_fields['mysql']['select'] = $data_speed;
       
       /* ---------------------------------------------------------------- */
       
@@ -222,7 +215,7 @@
       
       $data_speed = $cycles / $time_elapsed;
       
-      $this->post_fields['mysql']['search'] = $data_speed;
+      $this->_post_fields['mysql']['search'] = $data_speed;
       
       /* ---------------------------------------------------------------- */
       
@@ -242,7 +235,7 @@
       
       $data_speed = $cycles / $time_elapsed;
       
-      $this->post_fields['mysql']['update'] = $data_speed;
+      $this->_post_fields['mysql']['update'] = $data_speed;
       
       /* ---------------------------------------------------------------- */
       
@@ -261,7 +254,7 @@
       
       $data_speed = $cycles / $time_elapsed;
       
-      $this->post_fields['mysql']['delete'] = $data_speed;
+      $this->_post_fields['mysql']['delete'] = $data_speed;
       
       /* ---------------------------------------------------------------- */
       
@@ -296,7 +289,7 @@
       
       $measure_amount = $filesize / $time_elapsed / 1024 / 1000;
       
-      $this->post_fields['disk']['write'] = $measure_amount;
+      $this->_post_fields['disk']['write'] = $measure_amount;
 
       /* ---------------------------------------------------------------- */
       
@@ -317,7 +310,7 @@
       
       $measure_amount = $filesize / $time_elapsed / 1024 / 1000;
       
-      $this->post_fields['disk']['read'] = $measure_amount;
+      $this->_post_fields['disk']['read'] = $measure_amount;
 
       /* ---------------------------------------------------------------- */
       
@@ -332,16 +325,18 @@
       
       $measure_amount = $filesize / $time_elapsed / 1024 / 1000;
       
-      $this->post_fields['disk']['compile'] = $measure_amount;
+      $this->_post_fields['disk']['compile'] = $measure_amount;
       
       /* ---------------------------------------------------------------- */
       
       unlink($file);
     }
     
-    public function perform_upstream_test($size=1024000) {
+    public function perform_upstream_test($size=1024000, $country_code=null) {
       
-      switch($this->country) {
+      if (empty($country_code)) $country_code = $this->_country_code;
+      
+      switch($country_code) {
         case 'DE':
           $url = 'http://mirror.de.leaseweb.net/';
           break;
@@ -364,7 +359,7 @@
           $url = 'http://mirror.us.leaseweb.net/';
           break;
         default:
-          $url = 'http://'. strtolower($this->country) .'.releases.ubuntu.com/';
+          $url = 'http://'. strtolower($this->_country_code) .'.releases.ubuntu.com/';
           break;
       }
       
@@ -399,13 +394,15 @@
         throw new Exception("Problem reading data from $url, $php_errormsg");
       }
       
-      $this->post_fields['bandwidth']['upstream'] = $speed;
-      $this->post_fields['bandwidth']['upstream_url'] = $url;
+      $this->_post_fields['bandwidth']['upstream'] = $speed;
+      $this->_post_fields['bandwidth']['upstream_url'] = $url;
     }
     
-    public function perform_downstream_test($size=1024000) {
+    public function perform_downstream_test($size=1024000, $country_code=null) {
       
-      switch($this->country) {
+      if (empty($country_code)) $country_code = $this->_country_code;
+      
+      switch($country_code) {
         case 'DE':
           $url = 'http://mirror.de.leaseweb.net/ubuntu/dists/hardy/main/binary-i386/Packages.bz2';
           break;
@@ -427,7 +424,7 @@
           $url = 'http://mirror.us.leaseweb.net/ubuntu/dists/hardy/main/binary-i386/Packages.bz2';
           break;
         default:
-          $url = 'http://'. strtolower($this->country) .'.releases.ubuntu.com/oneiric/ubuntu-11.10-alternate-i386.iso.zsync';
+          $url = 'http://'. strtolower($this->_country_code) .'.releases.ubuntu.com/oneiric/ubuntu-11.10-alternate-i386.iso.zsync';
           break;
       }
       
@@ -464,8 +461,8 @@
       
       $speed = strlen($response) / $time_elapsed * 8 / 1024 / 1000;
       
-      $this->post_fields['bandwidth']['downstream'] = $speed;
-      $this->post_fields['bandwidth']['downstream_url'] = $url;
+      $this->_post_fields['bandwidth']['downstream'] = $speed;
+      $this->_post_fields['bandwidth']['downstream_url'] = $url;
     }
     
     public function collect_server_info() {
@@ -487,20 +484,20 @@
           'version' => php_uname('r'),
         ),
         'network' => array(
-          'country' => $this->country,
+          'country' => $this->_country_code,
           'machine' => php_uname('n'),
           'address' => $_SERVER['SERVER_ADDR'],
           'hostname' => gethostbyaddr($_SERVER['SERVER_ADDR']),
         ),
         'satellite' => array(
           'uri' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
-          'version' => $this->version,
+          'version' => $this->_version,
           'checksum' => md5_file(__FILE__),
         ),
         'noreport' => (isset($_GET['noreport']) ? 'true' : 'false'),
       );
       
-      $this->post_fields = array_merge($this->post_fields, $server_info);
+      $this->_post_fields = array_merge($this->_post_fields, $server_info);
     }
     
     private function http_request($url, $post_fields=false) {
@@ -524,7 +521,7 @@
     public function update($silent=false) {
       $updated = false;
     
-      $url = $this->api_url.'update2';
+      $url = $this->_api_url.'update2';
       
       $response = $this->http_request($url, array('whoami' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']));
       
@@ -574,7 +571,7 @@
     
     public function submit_results() {
       
-      $response = $this->http_request($this->api_url.'report', $this->post_fields);
+      $response = $this->http_request($this->_api_url.'report', $this->_post_fields);
       
       $content = unserialize($response);
       if ($content === false) die('Invalid API response data:<br/>' . $response);

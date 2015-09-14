@@ -1,4 +1,5 @@
 <?php
+
 // Require PHP 5
   if (phpversion() < 5) die('This script requires at least PHP 5 (2004-07-13). Your PHP version is :'. phpversion());
 
@@ -81,11 +82,8 @@
 // Check in for work
   file_put_contents('lastrun.dat', time());
   
-// Initiate performance class object
+// Initiate performance class object and run tests
   require_once('performance.class.php');
   $performance = new performance;
-  
-// Run performance check
-  $performance->run_test();
   
 ?>
