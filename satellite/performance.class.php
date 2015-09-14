@@ -7,8 +7,8 @@
     private $_debug = false;
     private $_country_code = '';
     
-    function __construct() {
-    
+    public function __construct() {
+      
       $this->_country_code = $this->_get_country();
       
       if (!isset($_SERVER['SERVER_ADDR']) || $_SERVER['SERVER_ADDR'] == '') {
@@ -75,15 +75,6 @@
       }
     }
     
-    private function _log($method_name, $message, $is_debug=false) {
-      if (!$this->_log) return;
-      
-      if ($is_debug && $this->_debug == false) return;
-      
-      echo date('H:i:s') .' ['. $method_name .'()'. (($is_debug) ? ':debug' : false) .'] '. $message . PHP_EOL;
-      flush();
-    }
-    
     public function perform_pi_calc() {
       
       $tsStart = microtime(true);
@@ -108,19 +99,21 @@
       $this->_post_fields['cpu']['pi'] = $time_elapsed;
     }
     
+    /*
     public function perform_for_calc($cycles=10000) {
       
       $tsStart = microtime(true);
       
       for ($i=0; $i<$cycles; $i++) {
         // Do something
-        // Coming in near future
+        // Coming in future?
       }
       
       $time_elapsed = microtime(true) - $tsStart;
       
       $this->_post_fields['cpu']['for'] = $time_elapsed;
     }
+    */
   
     public function perform_mysql_test($cycles=1000) {
     

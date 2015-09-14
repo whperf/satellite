@@ -2,11 +2,11 @@
 
   class database {
     private $_link = false;
-    private $_server = 'localhost';
-    private $_database = '';
-    private $_username = '';
-    private $_password = '';
-    public $table_prefix = 'whptest_';
+    private $_server = DB_SERVER;
+    private $_database = DB_DATABASE;
+    private $_username = DB_USERNAME;
+    private $_password = DB_PASSWORD;
+    public $table_prefix = DB_PREFIX;
     private $_type = null;
     
     public function connect() {

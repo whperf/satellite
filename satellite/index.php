@@ -82,7 +82,8 @@
 // Check in for work
   file_put_contents('lastrun.dat', time());
   
-// Initiate performance class object and run tests
+// Initiate configuration, performance class object, and run tests
+  require_once('config.php');
   require_once('performance.class.php');
   $performance = new performance;
   
