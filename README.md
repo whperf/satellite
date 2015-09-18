@@ -1,13 +1,11 @@
 
-                    www.webhosting-performance.com
+www.webhosting-performance.com
 
-######################################################################
-############################# INSTRUCTIONS ###########################
-######################################################################
+# INSTRUCTIONS
 
-# 1. Unzip the "satellite" folder.
+## 1. Unzip the "satellite" folder.
 
-# 2. Edit config.php:
+## 2. Insert your MySQL credentials in config.php:
 
     define('DB_SERVER', 'localhost');
     define('DB_USERNAME', '');
@@ -15,22 +13,20 @@
     define('DB_DATABASE', '');
     define('DB_PREFIX', 'whptest_');
 
-# 3. Upload the files to your desired location. Preferably in a somehow
-     cryptic folder name such as whp-x4j4K1c2/. You wouldn't want someone
-     repeatingly calling the script.
+## 3. Upload the files to your desired location.
+      Preferably in a somewhat cryptic folder name such as whp-x4j4K1c2/.
+      You wouldn't want someone repeatedly calling the script.
 
-# 4. Make the satellite folder and it's contents writeable by chmodding
-     it to i.e. 0777. This is to allow test data to be written and
-     automatic updates.
+## 4. Make the satellite folder and it's contents writeable.
+      Chmod it to e.g. 0777 to allow test data to be written and receive automatic  updates.
 
-# 5. Point your web browser to the folder:
+## 5. Point your web browser to the folder:
 
-     Example: http://www.mysite.com/whp-x4j4K1c2/
+      Example: http://www.mysite.com/whp-x4j4K1c2/
 
-     This will immediately execute the performance test unless there
-     are errors. The test takes aproximately 10 seconds. If you recceive
-     errors e-mail us at info@webhosting-performance.com.
+      This will immediately execute the performance test unless there
+      are errors. The test takes aproximately 10 seconds. If you recceive
+      errors e-mail us at info@webhosting-performance.com.
 
-######################################################################
-
-Done!
+## 6. Add Satellite for monitoring
+      Among with your test results you will have the opportunity to add the satellite for monitoring. Adding private machines or home computers is a violation to our service. Only web hosting providers are allowed to be monitored.
