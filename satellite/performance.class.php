@@ -2,15 +2,17 @@
   
   class performance {
     private $_post_fields = array();
-    private $_version = '1.3';
+    private $_version = '2.0';
     private $_api_url = 'http://www.webhosting-performance.com/api/';
     private $_debug = false;
     private $_country_code = '';
     
     public function __construct() {
       
+    // Set country code
       $this->_country_code = $this->_get_country();
-      
+    
+    // Set IP address
       if (!isset($_SERVER['SERVER_ADDR']) || $_SERVER['SERVER_ADDR'] == '') {
         $_SERVER['SERVER_ADDR'] = $this->_get_ip();
       }
@@ -122,6 +124,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Measure time to connect to MySQL
       $time_elapsed = 0;
       
       for ($i=0; $i < 10; $i++) {
@@ -138,6 +141,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Collect MySQL server info
       $database->connect();
       
       if (method_exists($database, 'get_server_info')) {
@@ -155,6 +159,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Measure time to insert MySQL data
       $tsStart = microtime(true);
       
       for ($i=0; $i < $cycles; $i++) {
@@ -171,6 +176,7 @@
     
       /* ---------------------------------------------------------------- */
 
+    // Measure time to select and get MySQL data
       $tsStart = microtime(true);
       
       $result = $database->query("SELECT * FROM `". $database->table_prefix ."test`");
@@ -191,6 +197,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Measure time to search and get MySQL data
       $tsStart = microtime(true);
       
       for ($i=0; $i < $cycles; $i++) {
@@ -212,6 +219,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Measure time to update MySQL data
       $tsStart = microtime(true);
       
       for ($i=0; $i < $cycles; $i++) {
@@ -232,6 +240,7 @@
       
       /* ---------------------------------------------------------------- */
       
+    // Measure time to delete MySQL data
       $tsStart = microtime(true);
       
       for ($i=0; $i < $cycles; $i++) {
@@ -262,6 +271,7 @@
     
       /* ---------------------------------------------------------------- */
       
+    // Write to disk
       $tsStart = microtime(true);
 
       $fh = fopen($file, 'w') or die('Can\'t open file');
@@ -286,7 +296,7 @@
 
       /* ---------------------------------------------------------------- */
       
-      // Read file
+    // Read from disk
       $tsStart = microtime(true);
       
       $fh = fopen($file, 'r');
@@ -307,7 +317,7 @@
 
       /* ---------------------------------------------------------------- */
       
-      //load and compile large php file
+    // Read and compile large php file from disk
       $tsStart = microtime(true);
       
       require_once($file);
@@ -512,6 +522,12 @@
     }
     
     public function update($silent=false) {
+      
+      if (defined('AUTO_UPDATE') && !AUTO_UPDATE) {
+        echo '<p>Auto updating is disabled, see config.php</p>';
+        return;
+      }
+      
       $updated = false;
     
       $url = $this->_api_url.'update2';
@@ -521,7 +537,7 @@
       $response = json_decode($response, true);
       if ($response === false) trigger_error("Unexpected response data from $url", E_USER_ERROR);
       
-      if (strtolower($response['status']) != 'ok') die($response['status'] .'.');
+      if (strtolower($response['status']) != 'ok') die($response['status']);
       
       if (!isset($response['files']) || !is_array($response['files'])) die('No files listed by API.');
       
