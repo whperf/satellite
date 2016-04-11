@@ -4,7 +4,7 @@
   if (phpversion() < 5) die('This script requires at least PHP 5 (2004-07-13). Your PHP version is :'. phpversion());
 
 // Set server timezone
-  date_default_timezone_set(ini_get('date.timezone'));
+  if (!ini_get('date.timezone')) ini_set('date.timezone', 'Europe/Stockholm');
   
 // System
   ini_set('display_errors', 'On');

@@ -50,9 +50,9 @@
       }
       
     // Attempt #1 - Freegeoip.net
-      $response = $this->http_request('http://freegeoip.net/json/');
+      $response = $this->http_request('http://ip-api.com/json');
       $response = json_decode($response, true);
-      $country_code = $response['country_code'];
+      $country_code = $response['countryCode'];
       if (!empty($country_code) && $country_code != 'XX') {
         file_put_contents('country.dat', $country_code);
         return $country_code;
@@ -122,7 +122,7 @@
       require_once('database.class.php');
       $database = new database;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Measure time to connect to MySQL
       $time_elapsed = 0;
@@ -139,7 +139,7 @@
       
       $this->_post_fields['mysql']['connect'] = $measure_time;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Collect MySQL server info
       $database->connect();
@@ -157,7 +157,7 @@
         ) ENGINE = MyISAM;"
       );
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Measure time to insert MySQL data
       $tsStart = microtime(true);
@@ -174,7 +174,7 @@
       
       $this->_post_fields['mysql']['insert'] = $data_speed;
     
-      /* ---------------------------------------------------------------- */
+      ############################################################
 
     // Measure time to select and get MySQL data
       $tsStart = microtime(true);
@@ -195,7 +195,7 @@
       
       $this->_post_fields['mysql']['select'] = $data_speed;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Measure time to search and get MySQL data
       $tsStart = microtime(true);
@@ -217,7 +217,7 @@
       
       $this->_post_fields['mysql']['search'] = $data_speed;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Measure time to update MySQL data
       $tsStart = microtime(true);
@@ -238,7 +238,7 @@
       
       $this->_post_fields['mysql']['update'] = $data_speed;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Measure time to delete MySQL data
       $tsStart = microtime(true);
@@ -258,7 +258,7 @@
       
       $this->_post_fields['mysql']['delete'] = $data_speed;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
       $database->query("drop table `". $database->table_prefix ."test`;");
     }
@@ -269,7 +269,7 @@
       
       file_put_contents($file, '');
     
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Write to disk
       $tsStart = microtime(true);
@@ -294,7 +294,7 @@
       
       $this->_post_fields['disk']['write'] = $measure_amount;
 
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Read from disk
       $tsStart = microtime(true);
@@ -315,7 +315,7 @@
       
       $this->_post_fields['disk']['read'] = $measure_amount;
 
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
     // Read and compile large php file from disk
       $tsStart = microtime(true);
@@ -330,7 +330,7 @@
       
       $this->_post_fields['disk']['compile'] = $measure_amount;
       
-      /* ---------------------------------------------------------------- */
+      ############################################################
       
       unlink($file);
     }
@@ -507,7 +507,7 @@
       
       $ch = curl_init($url);
       curl_setopt($ch, CURLOPT_HEADER, "Expect:\r\n");
-      curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+      curl_setopt($ch, CURLOPT_TIMEOUT, 15);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       if ($post_fields) {
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -571,7 +571,7 @@
       
       if (!$silent) {
         echo implode('<br />' . PHP_EOL, $output);
-        echo '<p>To run the test again, <a href="'. str_replace(array('index.php', 'update.php'), '', $_SERVER['REQUEST_URI']) .'">click here</a>.</p>';
+        echo '<p>To run the test again, <a href="'. $_SERVER['REQUEST_URI'] .'">click here</a>.</p>';
       } else {
         header('Location: '. $_SERVER['REQUEST_URI']);
         exit;

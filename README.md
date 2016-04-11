@@ -18,7 +18,7 @@ www.webhosting-performance.com
       You wouldn't want someone repeatedly calling the script.
 
 ## 4. Make the satellite folder and it's contents writeable.
-      Chmod it to e.g. 0777 to allow test data to be written and receive automatic  updates.
+      Chmod it to e.g. 0777 to allow test data to be written and receive automatic updates.
 
 ## 5. Point your web browser to the folder:
 
@@ -30,3 +30,4 @@ www.webhosting-performance.com
 
 ## 6. Add Satellite for monitoring
       Among with your test results you will have the opportunity to add the satellite for monitoring. Adding private machines or home computers is a violation to our service. Only web hosting providers are allowed to be monitored.
+      
