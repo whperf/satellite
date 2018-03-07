@@ -11,4 +11,3 @@
   
 // Automatic Updates
   define('AUTO_UPDATE', true);
-?>
