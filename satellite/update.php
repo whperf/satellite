@@ -8,7 +8,7 @@
 
   $updated = false;
 
-  $ch = curl_init('http://www.webhosting-performance.com/api/update2');
+  $ch = curl_init('https://www.webhosting-performance.com/api/update2');
   curl_setopt($ch, CURLOPT_HEADER, "Expect:\r\n");
   curl_setopt($ch, CURLOPT_TIMEOUT, 15);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -43,7 +43,7 @@
       }
 
     } else {
-      $output[] = $file['filename'] . ': Cheksum error from api';
+      $output[] = $file['filename'] . ': Checksum error from API';
     }
   }
 

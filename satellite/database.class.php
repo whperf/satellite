@@ -12,10 +12,10 @@
     public function connect() {
       if (function_exists('mysqli_connect')) {
         $this->_type = 'mysqli';
-        $this->_link = mysqli_connect($this->_server, $this->_username, $this->_password, $this->_database);
+        $this->_link = mysqli_connect($this->_server, $this->_username, $this->_password, $this->_database) or die('Failed connecting to database');
       } else {
         $this->_type = 'mysql';
-        $this->_link = mysql_connect($this->_server, $this->_username, $this->_password);
+        $this->_link = mysql_connect($this->_server, $this->_username, $this->_password) or die('Failed connecting to database');
         mysql_select_db($this->_database);
       }
     }

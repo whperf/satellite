@@ -13,7 +13,8 @@
   set_time_limit(60);
 
 // Set error handler
-  function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
+  function error_handler($errno, $errstr, $errfile, $errline) {
+
     if (!(error_reporting() & $errno)) return;
     $errfile = preg_replace('#^'. $_SERVER['DOCUMENT_ROOT'] .'#', '~', str_replace('\\', '/', $errfile));
 
@@ -48,8 +49,8 @@
       }
     }
 
-    if (in_array(strtolower(ini_get('display_errors')), array('on', 'true', '1'))) {
-      if (in_array(strtolower(ini_get('html_errors')), array(0, 'off', 'false')) || PHP_SAPI == 'cli') {
+    if (in_array(strtolower(ini_get('display_errors')), ['on', 'true', '1'])) {
+      if (in_array(strtolower(ini_get('html_errors')), [0, 'off', 'false']) || PHP_SAPI == 'cli') {
         echo strip_tags($output) . PHP_EOL;
       } else {
         echo $output . '<br />' . PHP_EOL;
@@ -62,7 +63,7 @@
       error_log(strip_tags($output));
     }
 
-    if (in_array($errno, array(E_ERROR, E_USER_ERROR))) exit;
+    if (in_array($errno, [E_ERROR, E_USER_ERROR])) exit;
   }
 
   set_error_handler('error_handler');
@@ -85,4 +86,4 @@
 // Initiate configuration, performance class object, and run tests
   require_once('config.php');
   require_once('performance.class.php');
-  $performance = new performance;
+  $performance = new performance();

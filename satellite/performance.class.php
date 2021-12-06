@@ -4,8 +4,7 @@
     private $_version = '2.0';
     private $_debug = false;
     private $_country_code = '';
-    private $_api_url = 'https://www.webhosting-performance.com/api/';
-    private $_post_fields = array();
+    private $_post_fields = [];
 
     public function __construct() {
 
@@ -389,6 +388,7 @@
       if (!$fp) {
         throw new Exception("Problem with $url, $php_errormsg");
       }
+
       $response = @stream_get_contents($fp);
       if ($response === false) {
         throw new Exception("Problem reading data from $url, $php_errormsg");
@@ -447,35 +447,35 @@
 
     public function collect_server_info() {
 
-      $server_info = array(
-        'php' => array(
+      $server_info = [
+        'php' => [
           'version' => phpversion(),
           'extensions' => implode(', ', get_loaded_extensions()),
           'disabled_functions' => ini_get('disable_functions'),
           'memory_limit' => ini_get('memory_limit'),
           'safe_mode' => ini_get('safe_mode'),
           'register_globals' => ini_get('register_globals'),
-        ),
-        'httpd' => array(
+        ],
+        'httpd' => [
           'name' => substr($_SERVER['SERVER_SOFTWARE'], 0, strpos($_SERVER['SERVER_SOFTWARE'], ' ')),
-        ),
-        'os' => array(
+        ],
+        'os' => [
           'type' => PHP_OS,
           'version' => php_uname('r'),
-        ),
-        'network' => array(
+        ],
+        'network' => [
           'country' => $this->_country_code,
           'machine' => php_uname('n'),
           'address' => $_SERVER['SERVER_ADDR'],
           'hostname' => gethostbyaddr($_SERVER['SERVER_ADDR']),
-        ),
-        'satellite' => array(
+        ],
+        'satellite' => [
           'uri' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
           'version' => $this->_version,
           'checksum' => md5_file(__FILE__),
-        ),
+        ],
         'noreport' => (isset($_GET['noreport']) ? 'true' : 'false'),
-      );
+      ];
 
       $this->_post_fields = array_merge($this->_post_fields, $server_info);
     }
@@ -510,9 +510,9 @@
 
       $updated = false;
 
-      $url = $this->_api_url.'update2';
-
-      $response = $this->http_request($url, array('whoami' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']));
+      $response = $this->http_request('https://www.webhosting-performance.com/api/update2', [
+        'whoami' => (($_SERVER['SERVER_PORT'] == '80') ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']]
+      );
 
       if (($response = json_decode($response, true)) === false ) {
         trigger_error("Unexpected response data from $url", E_USER_ERROR);
@@ -563,7 +563,7 @@
 
     public function submit_results() {
 
-      $response = $this->http_request($this->_api_url.'report', $this->_post_fields);
+      $response = $this->http_request('https://www.webhosting-performance.com/api/report', $this->_post_fields);
 
       $content = unserialize($response);
       if ($content === false) die('Invalid API response data:<br/>' . $response);
