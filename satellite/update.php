@@ -1,54 +1,59 @@
 <?php
 
-  ini_set('display_errors', 'On');
-  error_reporting(E_ALL);
-  ignore_user_abort(true);
+	try {
 
-  require_once('compatibility.inc.php');
+		ini_set('display_errors', 'On');
+		ini_set('error_log', 'errors.log');
+		error_reporting(E_ALL | E_STRICT);
+		ignore_user_abort(true);
 
-  $updated = false;
+		$ch = curl_init('https://www.webhosting-performance.com/api/update2');
 
-  $ch = curl_init('https://www.webhosting-performance.com/api/update2');
-  curl_setopt($ch, CURLOPT_HEADER, "Expect:\r\n");
-  curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  $response = curl_exec($ch);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-  if ($response === false) throw new Exception("Problem reading data from $url, ". curl_error($ch));
+		if (!$response = curl_exec($ch)) {
+			throw new Exception("No response from remote API: ". curl_error($ch));
+		}
 
-  $response = json_decode($response, true);
-  if ($response === false) throw new Exception("Problem reading data from $url, $php_errormsg: $response");
+		if (!$result = json_decode($response, true)) {
+			throw new Exception("Invalid JSON response");
+		}
 
-  if (strtolower($response['status']) != 'ok') die($response['status'] .'.');
+		if (strtolower($result['status']) != 'ok') {
+			throw new Exception($result['status']);
+		}
 
-  if (!isset($response['files']) || !is_array($response['files'])) die('No files listed by API.');
+		if (!isset($result['files']) || !is_array($result['files'])) {
+			throw new Exception('No files returned by API');
+		}
 
-  foreach ($response['files'] as $file) {
-    $file['source'] = base64_decode($file['source']);
+		foreach ($result['files'] as $file) {
+			$file['source'] = base64_decode($file['source']);
 
-    if (md5($file['source']) == $file['checksum']) {
+			if (md5($file['source']) != $file['checksum']) {
+				$output[] = $file['filename'] . ': Cheksum error for file ('. $file['filename'] .')';
+				continue;
+			}
 
-      if (!file_exists($file['filename']) || $file['checksum'] != md5_file($file['filename'])) {
+			if (is_file($file['filename']) && $file['checksum'] == md5_file($file['filename'])) {
+				$output[] = $file['filename'] . ': Already up to date';
+				continue;
+			}
 
-        if (file_put_contents($file['filename'], $file['source'])) {
-          $output[] = $file['filename'] .': Updated';
-          $updated = true;
+			if (!file_put_contents($file['filename'], $file['source'])) {
+				$output[] = $file['filename'] .': Cannot write to file';
+				continue;
+			}
 
-        } else {
-          $output[] = $file['filename'] .': Cannot write to file';
-        }
+			$output[] = $file['filename'] .': Updated';
+			file_put_contents('lastrun.dat', '');
+		}
 
-      } else {
-        $output[] = $file['filename'] . ': Already up to date';
-      }
+		echo '<p>'. implode('<br>' . PHP_EOL, $output) .'</p>';
 
-    } else {
-      $output[] = $file['filename'] . ': Checksum error from API';
-    }
-  }
+		echo '<p>To run the test again, <a href="'. str_replace('update.php', '', $_SERVER['REQUEST_URI']) .'">click here</a>.</p>';
 
-  if ($updated) file_put_contents('lastrun.dat', '');
-
-  echo '<p>'. implode('<br />' . PHP_EOL, $output) .'</p>';
-
-  echo '<p>To run the test again, <a href="'. str_replace('update.php', '', $_SERVER['REQUEST_URI']) .'">click here</a>.</p>';
+	} catch (Exception $e) {
+		echo 'Error: '.$e->getMessage();
+	}

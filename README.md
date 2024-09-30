@@ -3,7 +3,7 @@ www.webhosting-performance.com
 
 # INSTRUCTIONS
 
-## 1. Unzip the "satellite" folder.
+## 1. Unzip the "satellite/" folder.
 
 ## 2. Insert your MySQL credentials in config.php:
 
@@ -11,23 +11,23 @@ www.webhosting-performance.com
     define('DB_USERNAME', '');
     define('DB_PASSWORD', '');
     define('DB_DATABASE', '');
-    define('DB_PREFIX', 'whptest_');
 
-## 3. Upload the files to your desired location.
+    The performance tool will use the given database to create temporary tables prefixed whptest_* during the test.
 
-      Preferably in a somewhat cryptic folder name such as whp-x4j4K1c2/.
-      You wouldn't want someone repeatedly calling the script.
+## 3. Upload the "satellite/" folder and files to your desired location.
 
-## 4. Make the satellite folder and it's contents are writeable.
+      If this a predefined satellite, upload it to the application root.
+
+## 4. Make the "satellite/" folder and it's contents writable.
 
       Chmod it to e.g. 0777 to allow test data to be written and receive automatic updates.
 
-## 5. Point your web browser to the folder:
+## 5. Point your web browser to the satellite folder:
 
-      Example: http://www.mysite.com/whp-x4j4K1c2/
+      Example: http://www.mysite.com/satellite/
 
       This will immediately execute the performance test unless there are errors.
-      The test takes aproximately 10 seconds. If you recceive errors e-mail us at
+      The test takes aproximately 5 seconds. If you recceive errors e-mail us at
       info@webhosting-performance.com.
 
 ## 6. Add Satellite for monitoring
